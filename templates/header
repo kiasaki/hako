@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Stripe Collect</title>
+
+    <style type="text/css">
+      {{template "tachyons.min.css"}}
+      a {color: #357EDD;}
+      button {cursor: pointer;}
+      input:focus {outline: none;}
+    </style>
+</head>
+<body>
+  <div class="w-90 mw6 center">
+    <h1 class="tc fw3">
+      Hako
+    </h1>
+
+    <section class="pa4 br2 bg-near-white">

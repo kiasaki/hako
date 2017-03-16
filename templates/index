@@ -1,0 +1,9 @@
+{{template "header"}}
+
+<h3>Hako</h3>
+
+<p>
+  Hi there!
+</p>
+
+{{template "footer"}}
