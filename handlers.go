@@ -49,15 +49,44 @@ func handleSigninLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	SetCookie(w, r, authCookieName, sessionToken)
-	http.Redirect(w, r, "/v/0", 302)
+	http.Redirect(w, r, "/", 302)
 }
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/v/0", 302)
+	r.URL.Path = "/v/home.folder"
+	handleView(w, r)
+}
+
+func loadCurrentFileAndFolder(email, fileName string) (*HakoFile, []*HakoFile, error) {
+	file := &HakoFile{
+		Owner: email,
+		Name:  fileName,
+	}
+	err := storageGet(file)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	folderFiles, err := storageList(file.Owner, file.Folder())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return file, folderFiles, nil
 }
 
 func handleNew(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, r, "index", nil)
+	email := authEmailFromContext(r.Context())
+	file, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/v/"):])
+	if err != nil {
+		sendError(w, r, err)
+		return
+	}
+
+	renderTemplate(w, r, "new", H{
+		"file":        file,
+		"folderFiles": folderFiles,
+	})
 }
 
 func handleNewSubmit(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +95,16 @@ func handleNewSubmit(w http.ResponseWriter, r *http.Request) {
 
 func handleView(w http.ResponseWriter, r *http.Request) {
 	email := authEmailFromContext(r.Context())
-	renderTemplate(w, r, "index", email)
+	file, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/v/"):])
+	if err != nil {
+		sendError(w, r, err)
+		return
+	}
+
+	renderTemplate(w, r, "index", H{
+		"file":        file,
+		"folderFiles": folderFiles,
+	})
 }
 
 func handleEdit(w http.ResponseWriter, r *http.Request) {

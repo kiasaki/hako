@@ -1,15 +1,25 @@
-{{template "header"}}
+{{template "header" .}}
+
+{{$typ := .file.Type}}
 
 <div class="ph3 cf bb b--near-white" style="line-height: 43px">
-  <div class="fl fw6">Title</div>
+  <div class="fl fw6">{{.file.BaseName}}</div>
   <div class="fr">
-    <a href="/e/0">Edit</a>
+    {{if ne $typ "folder"}}
+      <a href="/e/0">Edit</a>
+    {{end}}
   </div>
 </div>
 
 <div class="pa3">
-  <h3>Hako</h3>
-  <p>{{.}}</p>
+  {{if eq $typ "folder"}}
+    <p>This is a folder.</p>
+    <p>Select one of it's files on the left to view it.</p>
+  {{else if eq $typ "image"}}
+    image
+  {{else}}
+    text
+  {{end}}
 </div>
 
-{{template "footer"}}
+{{template "footer" .}}

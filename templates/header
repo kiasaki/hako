@@ -22,9 +22,16 @@
       <h1 class="dib f4 fw3 ma0 pv2 ph3 bg-light-purple white">
         hako
       </h1>
-      <div class="f4 pv3">
-        Home
-      </div>
+      <header class="pv3">
+        <div class="f4 pb3">{{.file.Folder}}</div>
+        <a href="/n/{{.file.Folder}}.folder">New file</a>
+        <a href="/u/{{.file.Folder}}.folder">Upload file</a>
+      </header>
+      {{range $i, $file := .folderFiles}}
+        files
+      {{else}}
+        No files in this folder.
+      {{end}}
       <div class="absolute bottom-1 left-1">
         <a href="/signout">Sign out</a>
       </div>
