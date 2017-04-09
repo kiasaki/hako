@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Hako - Signin</title>
+
+    <style type="text/css">
+      {{template "tachyons.min.css"}}
+      html, body {height: 100%;}
+      * {box-sizing: border-box;}
+      a {color: #A463F2;}
+      button {cursor: pointer;}
+      input:focus {outline: none;}
+    </style>
+</head>
+<body class="bg-near-white">
+
+  <div class="mw6 center h-100 pa4 bg-white">
+    <h1 class="dib f4 fw3 ma0 pv2 ph3 bg-light-purple white">
+      hako
+    </h1>
+    <h2 class="fw3">Success!</h1>
+    <p>Check your email for a sign in link.</p>
+  </div>
+
+</body>
+</html>

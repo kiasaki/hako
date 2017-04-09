@@ -1,16 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
 const twoWeeks = 2 * 7 * 24 * time.Hour
-
-var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 type HakoCustomClaims struct {
 	Typ string `json:"typ"`
@@ -25,8 +23,8 @@ func createToken(typ string, id string, expireIn time.Duration) (string, error) 
 	return token.SignedString(jwtSecret)
 }
 
-func createLoginToken(id string) (string, error) {
-	return createToken("login", id, 15*time.Minute)
+func createSigninToken(id string) (string, error) {
+	return createToken("signin", id, 15*time.Minute)
 }
 
 func createSessionToken(id string) (string, error) {
@@ -43,16 +41,21 @@ func validateToken(typ, tokenStr string) (string, error) {
 		}
 		return jwtSecret, nil
 	})
-
-	if claims, ok := token.Claims.(*HakoCustomClaims); ok && token.Valid {
+	if err != nil {
+		return "", err
+	}
+	if !token.Valid {
+		return "", errors.New(fmt.Sprintf("Invalid %s token", typ))
+	}
+	if claims, ok := token.Claims.(*HakoCustomClaims); ok {
 		return claims.Id, nil
 	} else {
-		return "", err
+		return "", errors.New("Error casting token claims")
 	}
 }
 
-func validateLoginToken(tokenStr string) (string, error) {
-	return validateToken("login", tokenStr)
+func validateSigninToken(tokenStr string) (string, error) {
+	return validateToken("signin", tokenStr)
 }
 
 func validateSessionToken(tokenStr string) (string, error) {

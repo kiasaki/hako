@@ -40,13 +40,12 @@ func renderTemplate(w http.ResponseWriter, r *http.Request, name string, data in
 }
 
 func sendError(w http.ResponseWriter, r *http.Request, err error) {
+	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusInternalServerError)
-	if err := t.ExecuteTemplate(w, "error", err); err != nil {
-		w.Write([]byte("Internal Server Error"))
-		if os.Getenv("DEBUG") != "" {
-			w.Write([]byte("\n\n"))
-			w.Write([]byte(err.Error()))
-		}
+	if err := t.ExecuteTemplate(w, "error", err.Error()); err != nil {
+		w.Write([]byte("500 - Oops! An error occured"))
+		w.Write([]byte("\n\n"))
+		w.Write([]byte(err.Error()))
 	}
 }
 

@@ -20,6 +20,12 @@ var jwtConfig *jwt.Config
 var ctx context.Context
 var bucket *storage.BucketHandle
 
+var appBaseURL = os.Getenv("APP_BASE_URL")
+var jwtSecret = []byte(os.Getenv("APP_JWT_SECRET"))
+var sendgridApiKey = os.Getenv("SENDGRID_API_KEY")
+
+const authCookieName = "hako_session"
+
 func init() {
 	// Load templates
 	t = template.Must(template.ParseGlob("templates/*"))
@@ -50,6 +56,7 @@ func main() {
 		match("GET", "/signin", handleSignin),
 		match("POST", "/signin", handleSigninSubmit),
 		match("GET", "/signout", handleSignout),
+		match("GET", "/sl", handleSigninLink),
 		middlewareRequireAuth,
 		match("GET", "/", handleIndex),
 		match("GET", "/n/", handleNew),
