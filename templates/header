@@ -5,19 +5,28 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Stripe Collect</title>
+    <title>Hako</title>
 
     <style type="text/css">
       {{template "tachyons.min.css"}}
-      a {color: #357EDD;}
+      html, body {height: 100%;}
+      * {box-sizing: border-box;}
+      a {color: #A463F2;}
       button {cursor: pointer;}
       input:focus {outline: none;}
     </style>
 </head>
-<body>
-  <div class="w-90 mw6 center">
-    <h1 class="tc fw3">
-      Hako
-    </h1>
-
-    <section class="pa4 br2 bg-near-white">
+<body class="bg-near-white">
+  <div class="mw8 h-100">
+    <aside class="w5 pa3 fixed top-0 bottom-0 left-0 bg-near-white">
+      <h1 class="dib f4 fw3 ma0 pv2 ph3 bg-light-purple white">
+        hako
+      </h1>
+      <div class="f4 pv3">
+        Home
+      </div>
+      <div class="absolute bottom-1 left-1">
+        <a href="/signout">Sign out</a>
+      </div>
+    </aside>
+    <section class="pl7 bg-white h-100">

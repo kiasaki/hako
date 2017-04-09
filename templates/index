@@ -1,9 +1,14 @@
 {{template "header"}}
 
-<h3>Hako</h3>
+<div class="ph3 cf bb b--near-white" style="line-height: 43px">
+  <div class="fl fw6">Title</div>
+  <div class="fr">
+    <a href="/e/0">Edit</a>
+  </div>
+</div>
 
-<p>
-  Hi there!
-</p>
+<div class="pa3">
+  <h3>Hako</h3>
+</div>
 
 {{template "footer"}}

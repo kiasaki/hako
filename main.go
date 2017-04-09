@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"cloud.google.com/go/storage"
 	"golang.org/x/oauth2/google"
@@ -46,46 +45,25 @@ func init() {
 }
 
 func main() {
-	http.HandleFunc("/", indexHandler)
+	handler := NewChain(
+		middlewareLogWithTiming,
+		match("GET", "/signin", handleSignin),
+		match("POST", "/signin", handleSigninSubmit),
+		match("GET", "/signout", handleSignout),
+		middlewareRequireAuth,
+		match("GET", "/", handleIndex),
+		match("GET", "/n/", handleNew),
+		match("POST", "/n/", handleNewSubmit),
+		match("GET", "/v/", handleView),
+		match("GET", "/e/", handleEdit),
+		match("POST", "/e/", handleEditSubmit),
+		match("GET", "/d/", handleDelete),
+	).Then(http.HandlerFunc(handleNotFound))
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3000"
 	}
 	log.Printf("started listening on port %s\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
-}
-func renderTemplate(w http.ResponseWriter, r *http.Request, name string, data interface{}) {
-	if err := t.ExecuteTemplate(w, name, data); err != nil {
-		errorHandler(w, r, err)
-	}
-}
-
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, r, "index", nil)
-
-}
-
-func errorHandler(w http.ResponseWriter, r *http.Request, err error) {
-	w.WriteHeader(http.StatusInternalServerError)
-	if err := t.ExecuteTemplate(w, "error", err); err != nil {
-		w.Write([]byte("Internal Server Error"))
-		if os.Getenv("DEBUG") != "" {
-			w.Write([]byte("\n\n"))
-			w.Write([]byte(err.Error()))
-		}
-	}
-}
-
-func generateSignedUrl(invoiceId string) (string, error) {
-	return storage.SignedURL(
-		os.Getenv("GOOGLE_BUCKET_ID"),
-		invoiceId+".pdf",
-		&storage.SignedURLOptions{
-			GoogleAccessID: jwtConfig.Email,
-			PrivateKey:     jwtConfig.PrivateKey,
-			Method:         "GET",
-			Expires:        time.Now().Add(15 * time.Minute),
-		},
-	)
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }

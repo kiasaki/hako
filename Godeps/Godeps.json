@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/kiasaki/hako",
 	"GoVersion": "go1.7",
-	"GodepVersion": "v75",
+	"GodepVersion": "v79",
 	"Deps": [
 		{
 			"ImportPath": "cloud.google.com/go/compute/metadata",
@@ -22,6 +22,11 @@
 			"ImportPath": "cloud.google.com/go/storage",
 			"Comment": "v0.7.0-17-g49b49ef",
 			"Rev": "49b49ef3c9d0c5fec4438c6dda687093f6c1f8d8"
+		},
+		{
+			"ImportPath": "github.com/dgrijalva/jwt-go",
+			"Comment": "v3.0.0-17-g2268707",
+			"Rev": "2268707a8f0843315e2004ee4f1d021dc08baedf"
 		},
 		{
 			"ImportPath": "github.com/golang/protobuf/proto",

@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-func Log(handler http.Handler) http.Handler {
+func middlewareRequireAuth(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL)
+		// TODO
 		handler.ServeHTTP(w, r)
 	})
 }
 
-func LogWithTiming(handler http.Handler) http.Handler {
+func middlewareLogWithTiming(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func(started time.Time) {
 			timing := time.Since(started).Nanoseconds() / 1000.0
