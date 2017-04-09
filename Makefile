@@ -2,4 +2,4 @@ run: build
 	bash -c "source .env; ./hako"
 
 build:
-	go build -o hako .
+	go build -i -v -o hako .
