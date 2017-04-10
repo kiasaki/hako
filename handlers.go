@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/base64"
 	"errors"
+	"io"
 	"net/http"
 	"path/filepath"
 	"regexp"
@@ -155,6 +157,63 @@ func handleNewSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 	err := storagePut(file)
 	if err != nil {
+		sendError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, "/v/"+file.Path, 302)
+}
+
+func handleUpload(w http.ResponseWriter, r *http.Request) {
+	email := authEmailFromContext(r.Context())
+	folderPath := r.URL.Path[len("/v/"):]
+	file, folder, folderFiles, err := loadCurrentFileAndFolder(email, folderPath)
+	if err != nil {
+		sendError(w, r, err)
+		return
+	}
+
+	renderTemplate(w, r, "upload", H{
+		"file":        file,
+		"folder":      folder,
+		"folderFiles": folderFiles,
+	})
+}
+
+func handleUploadSubmit(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		sendError(w, r, errors.New("Error parsing form"))
+		return
+	}
+
+	f, handler, err := r.FormFile("file")
+	if err != nil {
+		sendError(w, r, errors.New("Error reading file"))
+		return
+	}
+	defer f.Close()
+
+	fileName := handler.Filename
+	if filepath.Ext(fileName) == "" {
+		fileName += ".txt" // Ensure we have an extension
+	}
+	file := &HakoFile{
+		Owner:    authEmailFromContext(r.Context()),
+		Path:     filepath.Clean(filepath.Join(r.URL.Path[len("/n/"):], fileName)),
+		Contents: []byte{},
+	}
+
+	// RAW Google Cloud call here for efficient copying
+	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(file.Owner))
+	filePath := filepath.Join(userPrefix, filepath.Clean(file.Path))
+	objHandle := bucket.Object(filePath)
+	wc := objHandle.NewWriter(ctx)
+
+	if _, err := io.Copy(wc, f); err != nil {
+		sendError(w, r, err)
+		return
+	}
+	if err = wc.Close(); err != nil {
 		sendError(w, r, err)
 		return
 	}

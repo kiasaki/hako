@@ -16,6 +16,7 @@
       input:focus {outline: none;}
       code {background: #f4f4f4;border-radius: 1px;padding: 0.1em 0.3em;display: inline-block;}
       .markdown pre {overflow-y: auto;background: #f4f4f4;border-radius: 1px;padding: 0.5em;font-size: 14px;}
+      .sidebar-link {white-space: nowrap;overflow: hidden;text-overflow: ellipsis;display: block;line-height: 1.5;}
     </style>
 </head>
 <body class="bg-near-white">
@@ -33,10 +34,10 @@
 
       <div class="pa3 bg-light-gray bt bb b--moon-gray">
         {{if and (ne .folder.Path ".") (ne .folder.Path "")}}
-          <a href="/v/{{.folder.ParentPath}}">../</a><br/>
+          <a class="sidebar-link" href="/v/{{.folder.ParentPath}}">../</a>
         {{end}}
         {{range $i, $file := .folderFiles}}
-          <a href="/v/{{$file.Path}}">{{$file.Name}}</a><br/>
+          <a class="sidebar-link" href="/v/{{$file.Path}}">{{$file.Name}}</a>
         {{end}}
       </div>
 

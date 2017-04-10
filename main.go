@@ -63,6 +63,8 @@ func main() {
 		match("GET", "/f/", handleFetch),
 		match("GET", "/n/", handleNew),
 		match("POST", "/n/", handleNewSubmit),
+		match("GET", "/u/", handleUpload),
+		match("POST", "/u/", handleUploadSubmit),
 		match("GET", "/v/", handleView),
 		match("GET", "/e/", handleEdit),
 		match("POST", "/e/", handleEditSubmit),

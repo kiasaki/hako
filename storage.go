@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/k0kubun/pp"
 	"github.com/russross/blackfriday"
 
 	"google.golang.org/api/iterator"
@@ -137,7 +136,6 @@ func storageList(folder *HakoFile) ([]*HakoFile, error) {
 	files := []*HakoFile{}
 	for {
 		objAttrs, err := it.Next()
-		pp.Println(objAttrs)
 		if err == iterator.Done {
 			break
 		}
