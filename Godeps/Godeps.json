@@ -37,6 +37,11 @@
 			"Rev": "8c5154c0fe5bf18cf649634d4c6df50897a32751"
 		},
 		{
+			"ImportPath": "github.com/russross/blackfriday",
+			"Comment": "v1.4-40-g5f33e7b",
+			"Rev": "5f33e7b7878355cd2b7e6b8eefc48a5472c69f70"
+		},
+		{
 			"ImportPath": "github.com/sendgrid/rest",
 			"Comment": "v2.3.1-1-ge814e65",
 			"Rev": "e814e651fe7fb0dccc758412c48afb4a0023bcd7"
@@ -50,6 +55,10 @@
 			"ImportPath": "github.com/sendgrid/sendgrid-go/helpers/mail",
 			"Comment": "v3.3.1-8-g22e570e",
 			"Rev": "22e570ec3adefad019c6c8ffbead6c515ca84062"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/sanitized_anchor_name",
+			"Rev": "1dba4b3954bc059efc3991ec364f9f9a35f597d2"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"path/filepath"
 	"regexp"
-	"strings"
 )
 
 var emailRegexp = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
@@ -59,14 +58,13 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	handleView(w, r)
 }
 
-func loadCurrentFileAndFolder(email, fileName string) (*HakoFile, []*HakoFile, error) {
+func loadCurrentFileAndFolder(email, filePath string) (*HakoFile, []*HakoFile, error) {
 	file := &HakoFile{
 		Owner: email,
-		Name:  fileName,
+		Path:  filePath,
 	}
-	// Handle home
-	if file.Name == "" {
-		file.Name = homeFolderName
+	if filePath == "" {
+		file.Path = "."
 	}
 	err := storageGet(file)
 	if err != nil {
@@ -83,7 +81,8 @@ func loadCurrentFileAndFolder(email, fileName string) (*HakoFile, []*HakoFile, e
 
 func handleNew(w http.ResponseWriter, r *http.Request) {
 	email := authEmailFromContext(r.Context())
-	file, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/v/"):])
+	folderPath := r.URL.Path[len("/v/"):]
+	file, folderFiles, err := loadCurrentFileAndFolder(email, folderPath)
 	if err != nil {
 		sendError(w, r, err)
 		return
@@ -101,30 +100,29 @@ func handleNewSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fileName := r.FormValue("name")
-	if fileName == "" || strings.Contains(fileName, "..") {
+	if fileName == "" {
 		sendError(w, r, errors.New("Invalid file name"))
 		return
 	}
 
 	email := authEmailFromContext(r.Context())
-	folder := HakoFile{Name: r.URL.Path[len("/n/"):]}
-	filePath := filepath.Join(folder.Folder(), fileName)
-	// Handle home (skip Home folder name)
-	if folder.Name == homeFolderName {
-		filePath = fileName
+	folder := HakoFile{Path: r.URL.Path[len("/n/"):]}
+	filePath := filepath.Clean(filepath.Join(folder.Folder(), fileName))
+	if fileName[len(fileName)-1] == '/' {
+		filePath += ".folder"
 	}
 	file := &HakoFile{
 		Owner:    email,
-		Name:     filePath,
+		Path:     filePath,
 		Contents: []byte{},
 	}
 	err := storagePut(file)
 	if err != nil {
-		sendError(w, r, errors.New("Invalid file name"))
+		sendError(w, r, err)
 		return
 	}
 
-	http.Redirect(w, r, "/v/"+file.Name, 302)
+	http.Redirect(w, r, "/v/"+file.Path, 302)
 }
 
 func handleView(w http.ResponseWriter, r *http.Request) {
@@ -135,22 +133,47 @@ func handleView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderTemplate(w, r, "index", H{
+	renderTemplate(w, r, "view", H{
 		"file":        file,
 		"folderFiles": folderFiles,
 	})
 }
 
 func handleEdit(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, r, "index", nil)
+	email := authEmailFromContext(r.Context())
+	file, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/e/"):])
+	if err != nil {
+		sendError(w, r, err)
+		return
+	}
+
+	renderTemplate(w, r, "edit", H{
+		"file":        file,
+		"folderFiles": folderFiles,
+	})
 }
 
 func handleEditSubmit(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, r, "index", nil)
+	if err := r.ParseForm(); err != nil {
+		sendError(w, r, errors.New("Error parsing form"))
+		return
+	}
+
+	file := &HakoFile{
+		Owner:    authEmailFromContext(r.Context()),
+		Path:     r.URL.Path[len("/e/"):],
+		Contents: []byte(r.FormValue("contents")),
+	}
+	if err := storagePut(file); err != nil {
+		sendError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, "/v/"+file.Path, 302)
 }
 
 func handleDelete(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, r, "index", nil)
+	renderTemplate(w, r, "view", nil)
 }
 
 func handleNotFound(w http.ResponseWriter, r *http.Request) {

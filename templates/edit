@@ -1,0 +1,21 @@
+{{template "header" .}}
+
+<form method="post" action="/e/{{.file.Path}}">
+  <div class="ph3 cf bb b--near-white" style="line-height: 43px">
+    <div class="fl fw6">{{.file.Name}}</div>
+    <div class="fr">
+      <a href="/v/{{.file.Path}}">Cancel</a>
+      <button type="submit" class="f6 link dim br1 ph3 pv2 mb2 dib white bg-black bw0">Save</button>
+    </div>
+  </div>
+
+  <div class="pa3">
+    <textarea
+      class="w-100 mw-100 b--moon-gray"
+      style="height: 800px;"
+      name="contents"
+    >{{.file.String}}</textarea>
+  </div>
+</form>
+
+{{template "footer" .}}

@@ -18,20 +18,26 @@
 </head>
 <body class="bg-near-white">
   <div class="mw8 h-100">
-    <aside class="w5 pa3 fixed top-0 bottom-0 left-0 bg-near-white">
-      <h1 class="dib f4 fw3 ma0 pv2 ph3 bg-light-purple white">
+    <aside class="w5 fixed top-0 bottom-0 left-0 bg-near-white">
+      <h1 class="mt3 ml3 dib f4 fw3 ma0 pv2 ph3 bg-light-purple white">
         hako
       </h1>
-      <header class="pv3">
-        <div class="f4 pb3">{{.file.Folder}}</div>
-        <a href="/n/{{.file.Folder}}.folder">New file</a>
-        <a href="/u/{{.file.Folder}}.folder">Upload file</a>
+
+      <header class="pa3">
+        <div class="f4 pb3">{{.file.FolderName}}</div>
+        <a href="/n/{{.file.Folder}}">New file</a>
+        <a href="/u/{{.file.Folder}}">Upload file</a>
       </header>
-      {{range $i, $file := .folderFiles}}
-        files
-      {{else}}
-        No files in this folder.
-      {{end}}
+
+      <div class="pa3 bg-light-gray bt bb b--moon-gray">
+        {{if ne .file.Path "."}}
+          <a href="/v/{{.file.ParentFolder}}">../</a><br/>
+        {{end}}
+        {{range $i, $file := .folderFiles}}
+          <a href="/v/{{$file.Path}}">{{$file.Name}}</a><br/>
+        {{end}}
+      </div>
+
       <div class="absolute bottom-1 left-1">
         <a href="/signout">Sign out</a>
       </div>

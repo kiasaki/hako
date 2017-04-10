@@ -3,10 +3,13 @@
 {{$typ := .file.Type}}
 
 <div class="ph3 cf bb b--near-white" style="line-height: 43px">
-  <div class="fl fw6">{{.file.BaseName}}</div>
+  <div class="fl fw6">{{.file.Name}}</div>
   <div class="fr">
+    {{if (eq $typ "text") or (eq $typ "markdown")}}
+      <a href="/e/{{.file.Path}}">Edit</a>
+    {{end}}
     {{if ne $typ "folder"}}
-      <a href="/e/0">Edit</a>
+      <a onclick="javascript:confirm('Are you sure?');" href="/d/{{.file.Path}}">Delete</a>
     {{end}}
   </div>
 </div>
@@ -17,8 +20,10 @@
     <p>Select one of it's files on the left to view it.</p>
   {{else if eq $typ "image"}}
     image
+  {{else if eq $typ "markdown"}}
+    {{.file.Markdown}}
   {{else}}
-    text
+    <pre style="overflow: auto;">{{.file.String}}</pre>
   {{end}}
 </div>
 

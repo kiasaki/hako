@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/russross/blackfriday"
+
 	"google.golang.org/api/iterator"
 
 	"cloud.google.com/go/storage"
@@ -17,32 +19,56 @@ var StorageFileNotExistError = errors.New("File does not exist")
 
 type HakoFile struct {
 	Owner    string
-	Name     string
+	Path     string
 	Size     int64
 	Created  time.Time
 	Updated  time.Time
 	Contents []byte
 }
 
-func (f *HakoFile) BaseName() string {
-	return filepath.Base(f.Name)
+func (f *HakoFile) Name() string {
+	if f.Path == "." {
+		return "Home"
+	}
+	if f.Ext() == ".folder" {
+		return filepath.Base(f.Path[:len(f.Path)-len(".folder")]) + "/"
+	}
+	return filepath.Base(f.Path)
+}
+
+func (f *HakoFile) ParentFolder() string {
+	if filepath.Dir(f.Path) == "." {
+		return ""
+	}
+	return filepath.Dir(f.Path) + ".folder"
 }
 
 func (f *HakoFile) Folder() string {
 	if f.Ext() == ".folder" {
-		return f.Name[:len(f.Name)-len(".folder")]
+		return f.Path
 	}
-	if filepath.Dir(f.Name) == "." {
+	return filepath.Dir(f.Path) + ".folder"
+}
+
+func (f *HakoFile) FolderName() string {
+	if f.Ext() == ".folder" {
+		return filepath.Base(f.Path[:len(f.Path)-len(".folder")])
+	}
+	folderName := filepath.Base(filepath.Dir(f.Path))
+	if folderName == "." {
 		return "Home"
 	}
-	return filepath.Dir(f.Name)
+	return folderName
 }
 
 func (f *HakoFile) Ext() string {
-	return strings.ToLower(filepath.Ext(f.Name))
+	return strings.ToLower(filepath.Ext(f.Path))
 }
 
 func (f *HakoFile) Type() string {
+	if f.Path == "." {
+		return "folder"
+	}
 	switch f.Ext() {
 	case ".folder":
 		return "folder"
@@ -58,18 +84,30 @@ func (f *HakoFile) Type() string {
 		return "image"
 	case ".pdf":
 		return "binary"
+	case ".md":
+		return "markdown"
+	case ".markdown":
+		return "markdown"
 	default:
 		return "text"
 	}
 }
 
+func (f *HakoFile) String() string {
+	return string(f.Contents)
+}
+
+func (f *HakoFile) Markdown() string {
+	return string(blackfriday.MarkdownCommon(f.Contents))
+}
+
 func storageGet(f *HakoFile) error {
-	if f.Type() == "folder" {
+	if f.Type() == "folder" || f.Path == "." {
 		return nil
 	}
 
 	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(f.Owner))
-	filePath := filepath.Join(userPrefix, filepath.Clean(f.Name))
+	filePath := filepath.Join(userPrefix, filepath.Clean(f.Path))
 	objHandle := bucket.Object(filePath)
 	rc, err := objHandle.NewReader(ctx)
 	if err == storage.ErrObjectNotExist {
@@ -90,7 +128,7 @@ func storageGet(f *HakoFile) error {
 		return err
 	}
 
-	f.Name = strings.Join(strings.Split(objAttrs.Name, "/")[1:], "/")
+	f.Path = strings.Join(strings.Split(objAttrs.Name, "/")[1:], "/")
 	f.Size = objAttrs.Size
 	f.Created = objAttrs.Created
 	f.Updated = objAttrs.Updated
@@ -98,13 +136,14 @@ func storageGet(f *HakoFile) error {
 	return nil
 }
 
-func storageList(email, folderName string) ([]*HakoFile, error) {
+func storageList(email, folderPath string) ([]*HakoFile, error) {
 	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(email))
-	folderPath := filepath.Join(userPrefix, filepath.Clean(folderName))
-	if folderName == homeFolderName {
-		folderPath = userPrefix
+	if !strings.HasSuffix(folderPath, ".folder") {
+		return nil, errors.New("Can't list files for folder not ending in '.folder'")
 	}
-	it := bucket.Objects(ctx, &storage.Query{Prefix: folderPath, Delimiter: "/"})
+	folderPath = folderPath[:len(folderPath)-len(".folder")]
+	folderFullPath := filepath.Join(userPrefix, filepath.Clean(folderPath)) + "/"
+	it := bucket.Objects(ctx, &storage.Query{Prefix: folderFullPath, Delimiter: "/"})
 
 	files := []*HakoFile{}
 	for {
@@ -119,14 +158,14 @@ func storageList(email, folderName string) ([]*HakoFile, error) {
 		if objAttrs.Prefix != "" {
 			files = append(files, &HakoFile{
 				Owner: email,
-				Name:  strings.Join(strings.Split(objAttrs.Prefix, "/")[1:], "/") + ".folder",
+				Path:  strings.Join(strings.Split(objAttrs.Prefix, "/")[1:], "/") + ".folder",
 			})
 			continue
 		}
 		// Handle normal files
 		files = append(files, &HakoFile{
 			Owner:   email,
-			Name:    strings.Join(strings.Split(objAttrs.Name, "/")[1:], "/"),
+			Path:    strings.Join(strings.Split(objAttrs.Name, "/")[1:], "/"),
 			Size:    objAttrs.Size,
 			Created: objAttrs.Created,
 			Updated: objAttrs.Updated,
@@ -137,7 +176,7 @@ func storageList(email, folderName string) ([]*HakoFile, error) {
 
 func storagePut(f *HakoFile) error {
 	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(f.Owner))
-	filePath := filepath.Join(userPrefix, filepath.Clean(f.Name))
+	filePath := filepath.Join(userPrefix, filepath.Clean(f.Path))
 	objHandle := bucket.Object(filePath)
 	wc := objHandle.NewWriter(ctx)
 
