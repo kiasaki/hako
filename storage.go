@@ -32,6 +32,9 @@ func (f *HakoFile) Folder() string {
 	if f.Ext() == ".folder" {
 		return f.Name[:len(f.Name)-len(".folder")]
 	}
+	if filepath.Dir(f.Name) == "." {
+		return "Home"
+	}
 	return filepath.Dir(f.Name)
 }
 
@@ -66,8 +69,8 @@ func storageGet(f *HakoFile) error {
 	}
 
 	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(f.Owner))
-	folderPath := filepath.Join(userPrefix, filepath.Clean(f.Name))
-	objHandle := bucket.Object(filepath.Join(userPrefix, folderPath))
+	filePath := filepath.Join(userPrefix, filepath.Clean(f.Name))
+	objHandle := bucket.Object(filePath)
 	rc, err := objHandle.NewReader(ctx)
 	if err == storage.ErrObjectNotExist {
 		return StorageFileNotExistError
@@ -87,7 +90,7 @@ func storageGet(f *HakoFile) error {
 		return err
 	}
 
-	f.Name = objAttrs.Name
+	f.Name = strings.Join(strings.Split(objAttrs.Name, "/")[1:], "/")
 	f.Size = objAttrs.Size
 	f.Created = objAttrs.Created
 	f.Updated = objAttrs.Updated
@@ -95,9 +98,12 @@ func storageGet(f *HakoFile) error {
 	return nil
 }
 
-func storageList(email, path string) ([]*HakoFile, error) {
+func storageList(email, folderName string) ([]*HakoFile, error) {
 	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(email))
-	folderPath := filepath.Join(userPrefix, filepath.Clean(path))
+	folderPath := filepath.Join(userPrefix, filepath.Clean(folderName))
+	if folderName == homeFolderName {
+		folderPath = userPrefix
+	}
 	it := bucket.Objects(ctx, &storage.Query{Prefix: folderPath, Delimiter: "/"})
 
 	files := []*HakoFile{}
@@ -113,18 +119,30 @@ func storageList(email, path string) ([]*HakoFile, error) {
 		if objAttrs.Prefix != "" {
 			files = append(files, &HakoFile{
 				Owner: email,
-				Name:  objAttrs.Prefix + ".folder",
+				Name:  strings.Join(strings.Split(objAttrs.Prefix, "/")[1:], "/") + ".folder",
 			})
 			continue
 		}
 		// Handle normal files
 		files = append(files, &HakoFile{
 			Owner:   email,
-			Name:    objAttrs.Name,
+			Name:    strings.Join(strings.Split(objAttrs.Name, "/")[1:], "/"),
 			Size:    objAttrs.Size,
 			Created: objAttrs.Created,
 			Updated: objAttrs.Updated,
 		})
 	}
 	return files, nil
+}
+
+func storagePut(f *HakoFile) error {
+	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(f.Owner))
+	filePath := filepath.Join(userPrefix, filepath.Clean(f.Name))
+	objHandle := bucket.Object(filePath)
+	wc := objHandle.NewWriter(ctx)
+
+	if _, err := wc.Write(f.Contents); err != nil {
+		return err
+	}
+	return wc.Close()
 }

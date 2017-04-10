@@ -24,6 +24,7 @@ var appBaseURL = os.Getenv("APP_BASE_URL")
 var jwtSecret = []byte(os.Getenv("APP_JWT_SECRET"))
 var sendgridApiKey = os.Getenv("SENDGRID_API_KEY")
 
+const homeFolderName = "Home.folder"
 const authCookieName = "hako_session"
 
 func init() {
