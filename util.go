@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/base64"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -49,15 +51,17 @@ func sendError(w http.ResponseWriter, r *http.Request, err error) {
 	}
 }
 
-func generateSignedUrl(invoiceId string) (string, error) {
+func fileSignedURL(file *HakoFile) (string, error) {
+	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(file.Owner))
+	filePath := filepath.Join(userPrefix, filepath.Clean(file.Path))
 	return storage.SignedURL(
 		os.Getenv("GOOGLE_BUCKET_ID"),
-		invoiceId+".pdf",
+		filePath,
 		&storage.SignedURLOptions{
 			GoogleAccessID: jwtConfig.Email,
 			PrivateKey:     jwtConfig.PrivateKey,
 			Method:         "GET",
-			Expires:        time.Now().Add(15 * time.Minute),
+			Expires:        time.Now().Add(5 * time.Minute),
 		},
 	)
 }
