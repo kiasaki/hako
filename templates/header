@@ -14,6 +14,8 @@
       a {color: #A463F2;}
       button {cursor: pointer;}
       input:focus {outline: none;}
+      code {background: #f4f4f4;border-radius: 1px;padding: 0.1em 0.3em;display: inline-block;}
+      .markdown pre {overflow-y: auto;background: #f4f4f4;border-radius: 1px;padding: 0.5em;font-size: 14px;}
     </style>
 </head>
 <body class="bg-near-white">
@@ -24,14 +26,14 @@
       </h1>
 
       <header class="pa3">
-        <div class="f4 pb3">{{.file.FolderName}}</div>
-        <a href="/n/{{.file.Folder}}">New file</a>
-        <a href="/u/{{.file.Folder}}">Upload file</a>
+        <div class="f4 pb3">{{.folder.Name}}</div>
+        <a href="/n/{{.folder.Path}}">New file</a>
+        <a href="/u/{{.folder.Path}}">Upload file</a>
       </header>
 
       <div class="pa3 bg-light-gray bt bb b--moon-gray">
-        {{if ne .file.Path "."}}
-          <a href="/v/{{.file.ParentFolder}}">../</a><br/>
+        {{if and (ne .folder.Path ".") (ne .folder.Path "")}}
+          <a href="/v/{{.folder.ParentPath}}">../</a><br/>
         {{end}}
         {{range $i, $file := .folderFiles}}
           <a href="/v/{{$file.Path}}">{{$file.Name}}</a><br/>

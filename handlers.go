@@ -58,31 +58,73 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	handleView(w, r)
 }
 
-func loadCurrentFileAndFolder(email, filePath string) (*HakoFile, []*HakoFile, error) {
+func loadCurrentFileAndFolder(email, filePath string) (*HakoFile, *HakoFile, []*HakoFile, error) {
 	file := &HakoFile{
 		Owner: email,
 		Path:  filePath,
 	}
-	if filePath == "" {
-		file.Path = "."
+	if !file.IsFolder() {
+		err := storageGet(file)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+	}
+
+	currentFolder := file
+	if !file.IsFolder() {
+		currentFolder = &HakoFile{
+			Owner: email,
+			Path:  file.ParentPath(),
+		}
+	}
+	folderFiles, err := storageList(currentFolder)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return file, currentFolder, folderFiles, nil
+}
+
+func handleFetch(w http.ResponseWriter, r *http.Request) {
+	file := &HakoFile{
+		Owner: authEmailFromContext(r.Context()),
+		Path:  r.URL.Path[len("/f/"):],
 	}
 	err := storageGet(file)
 	if err != nil {
-		return nil, nil, err
+		sendError(w, r, err)
+		return
 	}
-
-	folderFiles, err := storageList(file.Owner, file.Folder())
-	if err != nil {
-		return nil, nil, err
+	if file.Type() == "text" {
+		w.Header().Set("Content-Type", "text/plain")
+	} else if file.Type() == "markdown" {
+		w.Header().Set("Content-Type", "text/plain")
+	} else if file.Type() == "image" {
+		switch file.Ext() {
+		case "png":
+			w.Header().Set("Content-Type", "image/png")
+		case "gif":
+			w.Header().Set("Content-Type", "image/gif")
+		case "svg":
+			w.Header().Set("Content-Type", "image/svg+xml")
+		case "jpg":
+			w.Header().Set("Content-Type", "image/jpeg")
+		case "jpeg":
+			w.Header().Set("Content-Type", "image/jpeg")
+		default:
+			w.Header().Set("Content-Type", "image/jpeg")
+		}
+	} else {
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Header().Set("Content-Disposition", "attachment; filename="+file.Name())
 	}
-
-	return file, folderFiles, nil
+	w.Write(file.Contents)
 }
 
 func handleNew(w http.ResponseWriter, r *http.Request) {
 	email := authEmailFromContext(r.Context())
 	folderPath := r.URL.Path[len("/v/"):]
-	file, folderFiles, err := loadCurrentFileAndFolder(email, folderPath)
+	file, folder, folderFiles, err := loadCurrentFileAndFolder(email, folderPath)
 	if err != nil {
 		sendError(w, r, err)
 		return
@@ -90,6 +132,7 @@ func handleNew(w http.ResponseWriter, r *http.Request) {
 
 	renderTemplate(w, r, "new", H{
 		"file":        file,
+		"folder":      folder,
 		"folderFiles": folderFiles,
 	})
 }
@@ -105,15 +148,9 @@ func handleNewSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := authEmailFromContext(r.Context())
-	folder := HakoFile{Path: r.URL.Path[len("/n/"):]}
-	filePath := filepath.Clean(filepath.Join(folder.Folder(), fileName))
-	if fileName[len(fileName)-1] == '/' {
-		filePath += ".folder"
-	}
 	file := &HakoFile{
-		Owner:    email,
-		Path:     filePath,
+		Owner:    authEmailFromContext(r.Context()),
+		Path:     filepath.Clean(filepath.Join(r.URL.Path[len("/n/"):], fileName)),
 		Contents: []byte{},
 	}
 	err := storagePut(file)
@@ -127,7 +164,7 @@ func handleNewSubmit(w http.ResponseWriter, r *http.Request) {
 
 func handleView(w http.ResponseWriter, r *http.Request) {
 	email := authEmailFromContext(r.Context())
-	file, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/v/"):])
+	file, folder, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/v/"):])
 	if err != nil {
 		sendError(w, r, err)
 		return
@@ -135,13 +172,14 @@ func handleView(w http.ResponseWriter, r *http.Request) {
 
 	renderTemplate(w, r, "view", H{
 		"file":        file,
+		"folder":      folder,
 		"folderFiles": folderFiles,
 	})
 }
 
 func handleEdit(w http.ResponseWriter, r *http.Request) {
 	email := authEmailFromContext(r.Context())
-	file, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/e/"):])
+	file, folder, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/e/"):])
 	if err != nil {
 		sendError(w, r, err)
 		return
@@ -149,6 +187,7 @@ func handleEdit(w http.ResponseWriter, r *http.Request) {
 
 	renderTemplate(w, r, "edit", H{
 		"file":        file,
+		"folder":      folder,
 		"folderFiles": folderFiles,
 	})
 }
@@ -173,7 +212,26 @@ func handleEditSubmit(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDelete(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, r, "view", nil)
+	email := authEmailFromContext(r.Context())
+	file, _, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/d/"):])
+	if err != nil {
+		sendError(w, r, err)
+		return
+	}
+	if file.IsFolder() && len(folderFiles) > 0 {
+		sendError(w, r, errors.New("Can't delete a folder that still contains files."))
+		return
+	}
+	err = storageDel(file)
+	if err != nil {
+		sendError(w, r, err)
+		return
+	}
+	if file.ParentPath() == "." {
+		http.Redirect(w, r, "/v/", 302)
+	} else {
+		http.Redirect(w, r, "/v/"+file.ParentPath(), 302)
+	}
 }
 
 func handleNotFound(w http.ResponseWriter, r *http.Request) {

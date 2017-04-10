@@ -3,11 +3,13 @@ package main
 import (
 	"encoding/base64"
 	"errors"
+	"html/template"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/k0kubun/pp"
 	"github.com/russross/blackfriday"
 
 	"google.golang.org/api/iterator"
@@ -27,50 +29,32 @@ type HakoFile struct {
 }
 
 func (f *HakoFile) Name() string {
-	if f.Path == "." {
+	if f.Path == "." || f.Path == "" {
 		return "Home"
 	}
-	if f.Ext() == ".folder" {
-		return filepath.Base(f.Path[:len(f.Path)-len(".folder")]) + "/"
+	if f.IsFolder() {
+		return filepath.Base(f.Path) + "/"
 	}
 	return filepath.Base(f.Path)
 }
 
-func (f *HakoFile) ParentFolder() string {
-	if filepath.Dir(f.Path) == "." {
-		return ""
-	}
-	return filepath.Dir(f.Path) + ".folder"
-}
-
-func (f *HakoFile) Folder() string {
-	if f.Ext() == ".folder" {
-		return f.Path
-	}
-	return filepath.Dir(f.Path) + ".folder"
-}
-
-func (f *HakoFile) FolderName() string {
-	if f.Ext() == ".folder" {
-		return filepath.Base(f.Path[:len(f.Path)-len(".folder")])
-	}
-	folderName := filepath.Base(filepath.Dir(f.Path))
-	if folderName == "." {
-		return "Home"
-	}
-	return folderName
+func (f *HakoFile) ParentPath() string {
+	return filepath.Dir(f.Path)
 }
 
 func (f *HakoFile) Ext() string {
 	return strings.ToLower(filepath.Ext(f.Path))
 }
 
+func (f *HakoFile) IsFolder() bool {
+	return f.Type() == "folder"
+}
+
 func (f *HakoFile) Type() string {
-	if f.Path == "." {
-		return "folder"
-	}
 	switch f.Ext() {
-	case ".folder":
+	case "":
+		return "folder"
+	case ".":
 		return "folder"
 	case ".png":
 		return "image"
@@ -83,6 +67,16 @@ func (f *HakoFile) Type() string {
 	case ".gif":
 		return "image"
 	case ".pdf":
+		return "binary"
+	case ".zip":
+		return "binary"
+	case ".tar":
+		return "binary"
+	case ".gz":
+		return "binary"
+	case ".dmg":
+		return "binary"
+	case ".iso":
 		return "binary"
 	case ".md":
 		return "markdown"
@@ -97,15 +91,11 @@ func (f *HakoFile) String() string {
 	return string(f.Contents)
 }
 
-func (f *HakoFile) Markdown() string {
-	return string(blackfriday.MarkdownCommon(f.Contents))
+func (f *HakoFile) Markdown() template.HTML {
+	return template.HTML(string(blackfriday.MarkdownCommon(f.Contents)))
 }
 
 func storageGet(f *HakoFile) error {
-	if f.Type() == "folder" || f.Path == "." {
-		return nil
-	}
-
 	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(f.Owner))
 	filePath := filepath.Join(userPrefix, filepath.Clean(f.Path))
 	objHandle := bucket.Object(filePath)
@@ -136,18 +126,18 @@ func storageGet(f *HakoFile) error {
 	return nil
 }
 
-func storageList(email, folderPath string) ([]*HakoFile, error) {
-	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(email))
-	if !strings.HasSuffix(folderPath, ".folder") {
-		return nil, errors.New("Can't list files for folder not ending in '.folder'")
+func storageList(folder *HakoFile) ([]*HakoFile, error) {
+	if !folder.IsFolder() {
+		return nil, errors.New("Can only list files of folders")
 	}
-	folderPath = folderPath[:len(folderPath)-len(".folder")]
-	folderFullPath := filepath.Join(userPrefix, filepath.Clean(folderPath)) + "/"
+	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(folder.Owner))
+	folderFullPath := filepath.Join(userPrefix, filepath.Clean(folder.Path)) + "/"
 	it := bucket.Objects(ctx, &storage.Query{Prefix: folderFullPath, Delimiter: "/"})
 
 	files := []*HakoFile{}
 	for {
 		objAttrs, err := it.Next()
+		pp.Println(objAttrs)
 		if err == iterator.Done {
 			break
 		}
@@ -156,15 +146,17 @@ func storageList(email, folderPath string) ([]*HakoFile, error) {
 		}
 		// Handle synthetic folders
 		if objAttrs.Prefix != "" {
-			files = append(files, &HakoFile{
-				Owner: email,
-				Path:  strings.Join(strings.Split(objAttrs.Prefix, "/")[1:], "/") + ".folder",
-			})
 			continue
+			/*
+				files = append(files, &HakoFile{
+					Owner: folder.Owner,
+					Path:  strings.Join(strings.Split(objAttrs.Prefix, "/")[1:], "/"),
+				})
+			*/
 		}
 		// Handle normal files
 		files = append(files, &HakoFile{
-			Owner:   email,
+			Owner:   folder.Owner,
 			Path:    strings.Join(strings.Split(objAttrs.Name, "/")[1:], "/"),
 			Size:    objAttrs.Size,
 			Created: objAttrs.Created,
@@ -184,4 +176,11 @@ func storagePut(f *HakoFile) error {
 		return err
 	}
 	return wc.Close()
+}
+
+func storageDel(f *HakoFile) error {
+	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(f.Owner))
+	filePath := filepath.Join(userPrefix, filepath.Clean(f.Path))
+	objHandle := bucket.Object(filePath)
+	return objHandle.Delete(ctx)
 }

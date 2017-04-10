@@ -5,12 +5,13 @@
 <div class="ph3 cf bb b--near-white" style="line-height: 43px">
   <div class="fl fw6">{{.file.Name}}</div>
   <div class="fr">
-    {{if (eq $typ "text") or (eq $typ "markdown")}}
+    {{if or (eq $typ "text") (eq $typ "markdown")}}
       <a href="/e/{{.file.Path}}">Edit</a>
     {{end}}
     {{if ne $typ "folder"}}
-      <a onclick="javascript:confirm('Are you sure?');" href="/d/{{.file.Path}}">Delete</a>
+      <a href="/f/{{.file.Path}}">Download</a>
     {{end}}
+    <a onclick="javascript:return confirm('Are you sure?');" href="/d/{{.file.Path}}">Delete</a>
   </div>
 </div>
 
@@ -19,11 +20,14 @@
     <p>This is a folder.</p>
     <p>Select one of it's files on the left to view it.</p>
   {{else if eq $typ "image"}}
-    image
+    <img class="mw-100" src="/f/{{.file.Path}}" />
   {{else if eq $typ "markdown"}}
-    {{.file.Markdown}}
+    <div class="markdown">{{.file.Markdown}}</div>
+  {{else if eq $typ "text"}}
+    <pre class="ma0" style="overflow: auto;">{{.file.String}}</pre>
   {{else}}
-    <pre style="overflow: auto;">{{.file.String}}</pre>
+    Unknown file type.<br/>
+    <a href="/f/{{.file.Path}}">Download file</a>
   {{end}}
 </div>
 

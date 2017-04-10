@@ -60,6 +60,7 @@ func main() {
 		match("GET", "/sl", handleSigninLink),
 		middlewareRequireAuth,
 		match("GET", "/", handleIndex),
+		match("GET", "/f/", handleFetch),
 		match("GET", "/n/", handleNew),
 		match("POST", "/n/", handleNewSubmit),
 		match("GET", "/v/", handleView),
