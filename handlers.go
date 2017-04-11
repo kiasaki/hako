@@ -116,6 +116,9 @@ func handleFetch(w http.ResponseWriter, r *http.Request) {
 		default:
 			w.Header().Set("Content-Type", "image/jpeg")
 		}
+	} else if file.Ext() == ".pdf" {
+		// Don't force download on PDFs
+		w.Header().Set("Content-Type", "application/pdf")
 	} else {
 		w.Header().Set("Content-Type", "application/octet-stream")
 		w.Header().Set("Content-Disposition", "attachment; filename="+file.Name())
