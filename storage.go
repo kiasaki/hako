@@ -3,13 +3,9 @@ package main
 import (
 	"encoding/base64"
 	"errors"
-	"html/template"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
-	"time"
-
-	"github.com/russross/blackfriday"
 
 	"google.golang.org/api/iterator"
 
@@ -17,82 +13,6 @@ import (
 )
 
 var StorageFileNotExistError = errors.New("File does not exist")
-
-type HakoFile struct {
-	Owner    string
-	Path     string
-	Size     int64
-	Created  time.Time
-	Updated  time.Time
-	Contents []byte
-}
-
-func (f *HakoFile) Name() string {
-	if f.Path == "." || f.Path == "" {
-		return "Home"
-	}
-	if f.IsFolder() {
-		return filepath.Base(f.Path) + "/"
-	}
-	return filepath.Base(f.Path)
-}
-
-func (f *HakoFile) ParentPath() string {
-	return filepath.Dir(f.Path)
-}
-
-func (f *HakoFile) Ext() string {
-	return strings.ToLower(filepath.Ext(f.Path))
-}
-
-func (f *HakoFile) IsFolder() bool {
-	return f.Type() == "folder"
-}
-
-func (f *HakoFile) Type() string {
-	switch f.Ext() {
-	case "":
-		return "folder"
-	case ".":
-		return "folder"
-	case ".png":
-		return "image"
-	case ".jpg":
-		return "image"
-	case ".jpeg":
-		return "image"
-	case ".svg":
-		return "image"
-	case ".gif":
-		return "image"
-	case ".pdf":
-		return "binary"
-	case ".zip":
-		return "binary"
-	case ".tar":
-		return "binary"
-	case ".gz":
-		return "binary"
-	case ".dmg":
-		return "binary"
-	case ".iso":
-		return "binary"
-	case ".md":
-		return "markdown"
-	case ".markdown":
-		return "markdown"
-	default:
-		return "text"
-	}
-}
-
-func (f *HakoFile) String() string {
-	return string(f.Contents)
-}
-
-func (f *HakoFile) Markdown() template.HTML {
-	return template.HTML(string(blackfriday.MarkdownCommon(f.Contents)))
-}
 
 func storageGet(f *HakoFile) error {
 	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(f.Owner))

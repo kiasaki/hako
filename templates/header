@@ -11,7 +11,8 @@
       {{template "tachyons.min.css"}}
       html, body {height: 100%;}
       * {box-sizing: border-box;}
-      a {color: #A463F2;}
+      a {color: #A463F2;text-decoration: none;}
+      a:hover {text-decoration: underline;cursor: pointer;}
       button {cursor: pointer;}
       input:focus {outline: none;}
       code {background: #f4f4f4;border-radius: 1px;padding: 0.1em 0.3em;display: inline-block;}
@@ -45,4 +46,4 @@
         <a href="/signout">Sign out</a>
       </div>
     </aside>
-    <section class="pl7 bg-white h-100">
+    <section class="pl7 bg-white" style="min-height: 100%;">
