@@ -1,7 +1,7 @@
 <table class="f6 w-100 mw8 center" cellspacing="0">
   <thead>
     <tr>
-      <th class="fw6 bb b--moon-gray tl pb2 pr2 w-60">Name</th>
+      <th class="fw6 bb b--moon-gray tl pb2 pr2 w-60-ns">Name</th>
       <th class="fw6 bb b--moon-gray tl pb2 pr2">Last modified</th>
       <th class="fw6 bb b--moon-gray tl pb2 pr2">Size</th>
     </tr>
@@ -9,7 +9,7 @@
   <tbody class="lh-copy">
     {{if and (ne .folder.Path ".") (ne .folder.Path "")}}
       <tr>
-        <td class="pv2 pr2 bb b--moon-gray w-60">
+        <td class="pv2 pr2 bb b--moon-gray w-60-ns">
           <a class="sidebar-link" href="/v/{{.folder.ParentPath}}">../</a>
         </td>
         <td class="pv2 pr2 bb b--moon-gray">&nbsp;</td>
@@ -18,7 +18,7 @@
     {{end}}
     {{range $i, $file := .folderFiles}}
       <tr>
-        <td class="pv2 pr2 bb b--moon-gray w-60">
+        <td class="pv2 pr2 bb b--moon-gray w-60-ns">
           <a class="sidebar-link" href="/v/{{$file.Path}}">{{$file.Name}}</a>
         </td>
         <td class="pv2 pr2 bb b--moon-gray">

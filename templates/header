@@ -18,11 +18,17 @@
       code {background: #f4f4f4;border-radius: 1px;padding: 0.1em 0.3em;display: inline-block;}
       .markdown pre {overflow-y: auto;background: #f4f4f4;border-radius: 1px;padding: 0.5em;font-size: 14px;}
       .sidebar-link {white-space: nowrap;overflow: hidden;text-overflow: ellipsis;display: block;line-height: 1.5;}
+      @media (max-width: 480px) {
+        body {font-size: 14px;}
+      }
+      @media (min-width: 481px) {
+        .mh-100-ns {min-height: 100%;}
+      }
     </style>
 </head>
 <body class="bg-near-white">
-  <div class="mw8 h-100">
-    <aside class="w5 fixed top-0 bottom-0 left-0 bg-near-white">
+  <div class="mw8 h-100-ns">
+    <aside class="w5-ns fixed-ns top-0 bottom-0 left-0 bg-near-white">
       <h1 class="mt3 ml3 dib f4 fw3 ma0 pv2 ph3 bg-light-purple white">
         hako
       </h1>
@@ -42,8 +48,8 @@
         {{end}}
       </div>
 
-      <div class="absolute bottom-1 left-1">
+      <div class="absolute bottom-1 left-1 dn db-ns">
         <a href="/signout">Sign out</a>
       </div>
     </aside>
-    <section class="pl7 bg-white" style="min-height: 100%;">
+    <section class="pl7-ns bg-white mh-100-ns">
