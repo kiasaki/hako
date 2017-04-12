@@ -12,7 +12,7 @@
     <p>
       Chose a file to upload.
     </p>
-    <input type="file" name="file" class="db w5 pa2 mb2 br1 ba" />
+    <input type="file" name="file" class="db w5 pa2 mb2 br1 ba" autofocus />
     <button type="submit" class="f6 link dim br1 ph3 pv2 mb2 dib white bg-black bw0">Upload</button>
   </form>
 </div>

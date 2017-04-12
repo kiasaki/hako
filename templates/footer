@@ -5,6 +5,12 @@
     <a href="/signout">Sign out</a>
   </div>
 
+  <script type="text/javascript">
+    {{template "ramda.min.js"}}
+    {{template "mithril.min.js"}}
+    {{template "sjcl.js"}}
+    {{template "app.js"}}
+  </script>
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/default.min.css">
   <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/highlight.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>

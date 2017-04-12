@@ -11,9 +11,10 @@
 
   <div class="pa3">
     <textarea
-      class="w-100 mw-100 b--moon-gray"
+      class="w-100 mw-100 b--moon-gray code f6 outline-0"
       style="height: 800px;"
       name="contents"
+      autofocus
     >{{.file.String}}</textarea>
   </div>
 </form>

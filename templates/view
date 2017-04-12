@@ -2,34 +2,49 @@
 
 {{$typ := .file.Type}}
 
-<div class="ph3 cf bb b--near-white" style="line-height: 43px">
+<div class="ph3 cf bb b--moon-gray" style="line-height: 43px">
   <div class="fl fw6">{{.file.Name}}</div>
   <div class="fr">
     {{if or (eq $typ "text") (eq $typ "markdown")}}
-      <a href="/e/{{.file.Path}}">Edit</a>
+      <a class="ml2" href="/e/{{.file.Path}}">Edit</a>
     {{end}}
     {{if ne $typ "folder"}}
-      <a href="/f/{{.file.Path}}">Download</a>
+      <a class="ml2" href="/f/{{.file.Path}}">Download</a>
     {{end}}
-    <a onclick="javascript:return confirm('Are you sure?');" href="/d/{{.file.Path}}">Delete</a>
+    <a class="ml2" onclick="javascript:return confirm('Are you sure?');" href="/d/{{.file.Path}}">Delete</a>
   </div>
 </div>
 
-<div class="pa3">
-  {{if eq $typ "folder"}}
+{{if eq $typ "folder"}}
+  <div class="pa3">
     {{template "view-folder" .}}
-  {{else if eq $typ "image"}}
+  </div>
+{{else if eq $typ "image"}}
+  <div class="pa3">
     <img class="mw-100" src="/f/{{.file.Path}}" />
-  {{else if eq $typ "markdown"}}
+  </div>
+{{else if eq $typ "markdown"}}
+  <div class="pa3">
     <div class="markdown">{{.file.Markdown}}</div>
-  {{else if eq $typ "text"}}
-    <pre class="ma0" style="overflow: auto;">{{.file.String}}</pre>
-  {{else}}
+  </div>
+{{else if eq $typ "text"}}
+  <div class="pa3">
+    <pre class="ma0 overflow-auto">{{.file.String}}</pre>
+  </div>
+{{else if eq $typ "vault"}}
+  <div id="vaultRoot"></div>
+  <script type="text/javascript">
+    window.onload = function() {
+      initPasswordVault('{{.file.Path}}', '{{.file.String}}');
+    };
+  </script>
+{{else}}
+  <div class="pa3">
     <div class="pb4 pt1 br2 bg-near-white tc">
       <h2 class="fw3">Unknown file type.</h2>
       <a href="/f/{{.file.Path}}">Download file</a>
     </div>
-  {{end}}
-</div>
+  </div>
+{{end}}
 
 {{template "footer" .}}

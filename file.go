@@ -68,6 +68,8 @@ func (f *HakoFile) Type() string {
 		return "binary"
 	case ".iso":
 		return "binary"
+	case ".vault":
+		return "vault"
 	case ".md":
 		return "markdown"
 	case ".markdown":

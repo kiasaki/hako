@@ -27,7 +27,7 @@
     <p>It works like this: provide your email, we'll send you a link that will log you in automatically.</p>
 
     <form method="post" action="/signin">
-      <input type="email" name="email" class="db w-100 pa2 mb2 br1 ba" placeholder="Email" />
+      <input type="email" name="email" class="db w-100 pa2 mb2 br1 ba" placeholder="Email" autofocus />
       <button type="submit" class="f6 link dim br1 ph3 pv2 mb2 dib white bg-black bw0">Send me a sign in link</button>
     </form>
   </div>

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 var emailRegexp = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
@@ -83,6 +84,20 @@ func loadCurrentFileAndFolder(email, filePath string) (*HakoFile, *HakoFile, []*
 	if err != nil {
 		return nil, nil, nil, err
 	}
+
+	// Sort files
+	folderFilesFolders := []*HakoFile{}
+	folderFilesFiles := []*HakoFile{}
+	for _, f := range folderFiles {
+		if f.IsFolder() {
+			folderFilesFolders = append(folderFilesFolders, f)
+		} else {
+			folderFilesFiles = append(folderFilesFiles, f)
+		}
+	}
+	folderFiles = make([]*HakoFile, len(folderFiles))
+	copy(folderFiles[:], folderFilesFolders)
+	copy(folderFiles[len(folderFilesFolders):], folderFilesFiles)
 
 	return file, currentFolder, folderFiles, nil
 }
@@ -255,7 +270,13 @@ func handleEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleEditSubmit(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	var err error
+	if strings.Contains(r.Header.Get("Content-Type"), "multipart") {
+		err = r.ParseMultipartForm(32 << 20)
+	} else {
+		err = r.ParseForm()
+	}
+	if err != nil {
 		sendError(w, r, errors.New("Error parsing form"))
 		return
 	}
@@ -270,7 +291,12 @@ func handleEditSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/v/"+file.Path, 302)
+	if strings.Contains(r.Header.Get("Accept"), "application/json") {
+		w.WriteHeader(200)
+		w.Write([]byte(`{"errors": []}`))
+	} else {
+		http.Redirect(w, r, "/v/"+file.Path, 302)
+	}
 }
 
 func handleDelete(w http.ResponseWriter, r *http.Request) {

@@ -16,6 +16,7 @@
       button {cursor: pointer;}
       input:focus {outline: none;}
       code {background: #f4f4f4;border-radius: 1px;padding: 0.1em 0.3em;display: inline-block;}
+      .elips {white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
       .markdown pre {overflow-y: auto;background: #f4f4f4;border-radius: 1px;padding: 0.5em;font-size: 14px;}
       .sidebar-link {white-space: nowrap;overflow: hidden;text-overflow: ellipsis;display: block;line-height: 1.5;}
       @media (max-width: 480px) {
@@ -34,9 +35,9 @@
       </h1>
 
       <header class="pa3">
-        <div class="f4 pb3">{{.folder.Name}}</div>
+        <div class="f4 pb3 elips">{{.folder.Name}}</div>
         <a href="/n/{{.folder.Path}}">New file</a>
-        <a href="/u/{{.folder.Path}}">Upload file</a>
+        <a href="/u/{{.folder.Path}}" class="ml2">Upload file</a>
       </header>
 
       <div class="pa3 bg-light-gray bt bb b--moon-gray">
