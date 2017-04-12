@@ -4,6 +4,7 @@
       <th class="fw6 bb b--moon-gray tl pb2 pr2 w-60-ns">Name</th>
       <th class="fw6 bb b--moon-gray tl pb2 pr2">Last modified</th>
       <th class="fw6 bb b--moon-gray tl pb2 pr2">Size</th>
+      <th class="fw6 bb b--moon-gray tl pb2 pr2">Actions</th>
     </tr>
   </thead>
   <tbody class="lh-copy">
@@ -12,6 +13,7 @@
         <td class="pv2 pr2 bb b--moon-gray w-60-ns">
           <a class="sidebar-link" href="/v/{{.folder.ParentPath}}">../</a>
         </td>
+        <td class="pv2 pr2 bb b--moon-gray">&nbsp;</td>
         <td class="pv2 pr2 bb b--moon-gray">&nbsp;</td>
         <td class="pv2 pr2 bb b--moon-gray">&nbsp;</td>
       </tr>
@@ -29,6 +31,13 @@
             {{$file.SizeString}}
           {{else}}
             N/A
+          {{end}}
+        </td>
+        <td class="pv2 pr2 bb b--moon-gray">
+          {{if ne $file.Type "folder"}}
+            <a href="/f/{{$file.Path}}" alt="Download">&#8681;</a>
+          {{else}}
+            &nbsp;
           {{end}}
         </td>
       </tr>
