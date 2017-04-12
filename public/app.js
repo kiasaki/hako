@@ -293,13 +293,13 @@ PV.Views.ItemView = {
     );
     return m("main.pa3", [
       m("strong.db.mb1", "Name"),
-      m("div.code.pa2.mb3.bg-near-white", selectedItem.name),
+      m("div.code.pa2.mb3.br1.bg-near-white", selectedItem.name || m.trust("&nbsp;")),
       m("strong.db.mb1", "Username"),
-      m("div.code.pa2.mb3.bg-near-white", selectedItem.username),
+      m("div.code.pa2.mb3.br1.bg-near-white", selectedItem.username || m.trust("&nbsp;")),
       m("strong.db.mb1", "Password"),
-      m("div.code.pa2.mb3.bg-near-white", selectedItem.password),
+      m("div.code.pa2.mb3.br1.bg-near-white", selectedItem.password || m.trust("&nbsp;")),
       m("strong.db.mb1", "Notes"),
-      m("pre.code.pa2.mb3.bg-near-white", selectedItem.notes),
+      m("pre.code.pa2.mb3.br1.bg-near-white", selectedItem.notes || m.trust("&nbsp;")),
       m(PV.Views.Button, {
         text: "Edit",
         onclick: PV.Actions.editItemStart.bind(null, selectedItem.id),
