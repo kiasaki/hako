@@ -4,7 +4,7 @@
       <th class="fw6 bb b--moon-gray tl pb2 pr2 w-60-ns">Name</th>
       <th class="fw6 bb b--moon-gray tl pb2 pr2">Last modified</th>
       <th class="fw6 bb b--moon-gray tl pb2 pr2">Size</th>
-      <th class="fw6 bb b--moon-gray tl pb2 pr2">Actions</th>
+      <th class="fw6 bb b--moon-gray tl pb2 pr2">&nbsp;</th>
     </tr>
   </thead>
   <tbody class="lh-copy">

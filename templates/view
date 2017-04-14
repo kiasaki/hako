@@ -23,6 +23,10 @@
   <div class="pa3">
     <img class="mw-100" src="/f/{{.file.Path}}" />
   </div>
+{{else if eq $typ "audio"}}
+  <div class="pa3">
+    <audio src="{{.file.SignedURL}}" controls="controls" class="w-100" />
+  </div>
 {{else if eq $typ "markdown"}}
   <div class="pa3">
     <div class="markdown">{{.file.Markdown}}</div>

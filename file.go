@@ -68,6 +68,18 @@ func (f *HakoFile) Type() string {
 		return "binary"
 	case ".iso":
 		return "binary"
+	case ".mp3":
+		return "audio"
+	case ".ogg":
+		return "audio"
+	case ".flac":
+		return "audio"
+	case ".wav":
+		return "audio"
+	case ".aiff":
+		return "audio"
+	case ".webm":
+		return "audio"
 	case ".vault":
 		return "vault"
 	case ".md":
@@ -94,4 +106,12 @@ func (f *HakoFile) UpdatedString() string {
 
 func (f *HakoFile) SizeString() string {
 	return bytesString(uint64(f.Size))
+}
+
+func (f *HakoFile) SignedURL() string {
+	url, err := fileSignedURL(f)
+	if err != nil {
+		panic(err)
+	}
+	return url
 }
