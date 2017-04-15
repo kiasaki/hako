@@ -91,6 +91,11 @@ func (f *HakoFile) Type() string {
 	}
 }
 
+func (f *HakoFile) ViewNeedsContents() bool {
+	typ := f.Type()
+	return typ == "vault" || typ == "markdown" || typ == "text"
+}
+
 func (f *HakoFile) String() string {
 	return string(f.Contents)
 }

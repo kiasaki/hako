@@ -67,7 +67,7 @@ func loadCurrentFileAndFolder(email, filePath string) (*HakoFile, *HakoFile, []*
 		Path:  filePath,
 	}
 	if !file.IsFolder() {
-		err := storageGet(file)
+		err := storageGet(file, file.ViewNeedsContents())
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -107,7 +107,7 @@ func handleFetch(w http.ResponseWriter, r *http.Request) {
 		Owner: authEmailFromContext(r.Context()),
 		Path:  r.URL.Path[len("/f/"):],
 	}
-	err := storageGet(file)
+	err := storageGet(file, true)
 	if err != nil {
 		sendError(w, r, err)
 		return

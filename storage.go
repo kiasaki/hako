@@ -14,22 +14,26 @@ import (
 
 var StorageFileNotExistError = errors.New("File does not exist")
 
-func storageGet(f *HakoFile) error {
+func storageGet(f *HakoFile, fetchContents bool) error {
 	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(f.Owner))
 	filePath := filepath.Join(userPrefix, filepath.Clean(f.Path))
 	objHandle := bucket.Object(filePath)
-	rc, err := objHandle.NewReader(ctx)
-	if err == storage.ErrObjectNotExist {
-		return StorageFileNotExistError
-	} else if err != nil {
-		return err
-	}
 
-	// Fetch file contents
-	defer rc.Close()
-	contents, err := ioutil.ReadAll(rc)
-	if err != nil {
-		return err
+	if fetchContents {
+		rc, err := objHandle.NewReader(ctx)
+		if err == storage.ErrObjectNotExist {
+			return StorageFileNotExistError
+		} else if err != nil {
+			return err
+		}
+
+		// Fetch file contents
+		defer rc.Close()
+		contents, err := ioutil.ReadAll(rc)
+		if err != nil {
+			return err
+		}
+		f.Contents = contents
 	}
 
 	objAttrs, err := objHandle.Attrs(ctx)
@@ -41,7 +45,6 @@ func storageGet(f *HakoFile) error {
 	f.Size = objAttrs.Size
 	f.Created = objAttrs.Created
 	f.Updated = objAttrs.Updated
-	f.Contents = contents
 	return nil
 }
 

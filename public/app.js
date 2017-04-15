@@ -217,7 +217,7 @@ PV.Views.Main = {
 PV.Views.ItemList = {
   view: function() {
     var filteredItems = R.sortBy(R.prop("name"), R.filter(
-      R.compose(R.contains(PV.state.search), R.prop("name")),
+      R.compose(R.contains(PV.state.search.toLowerCase()), R.compose(R.toLower, R.prop("name"))),
       PV.state.contents.items
     ));
     return m("div", [

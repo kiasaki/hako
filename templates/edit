@@ -5,7 +5,7 @@
     <div class="fl fw6">{{.file.Name}}</div>
     <div class="fr">
       <a href="/v/{{.file.Path}}">Cancel</a>
-      <button type="submit" class="f6 link dim br1 ph3 pv2 mb2 dib white bg-black bw0">Save</button>
+      <button type="submit" class="f6 link dim br1 ph3 pv2 mb2 ml2 dib white bg-black bw0">Save</button>
     </div>
   </div>
 
