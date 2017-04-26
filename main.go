@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"sync"
 
 	"cloud.google.com/go/storage"
 	"golang.org/x/oauth2/google"
@@ -53,6 +56,7 @@ func init() {
 
 func main() {
 	handler := NewChain(
+		match("GET", "/public", handlePublicAsset),
 		middlewareLogWithTiming,
 		match("GET", "/signin", handleSignin),
 		match("POST", "/signin", handleSigninSubmit),
@@ -77,4 +81,37 @@ func main() {
 	}
 	log.Printf("started listening on port %s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))
+}
+
+func handlePublicAsset(w http.ResponseWriter, r *http.Request) {
+	contents := getPublicAssetFile(r.URL.Path[1:])
+
+	ext := filepath.Ext(r.URL.Path)
+	if ext == ".png" {
+		w.Header().Set("Content-Type", "image/png")
+	} else if ext == ".js" {
+		w.Header().Set("Content-Type", "application/javascript")
+	} else if ext == ".css" {
+		w.Header().Set("Content-Type", "text/css")
+	}
+
+	w.Write(contents)
+}
+
+var assetFilesM sync.Mutex
+var assetFiles = map[string][]byte{}
+
+func getPublicAssetFile(name string) []byte {
+	assetFilesM.Lock()
+	defer assetFilesM.Unlock()
+	if c, ok := assetFiles[name]; ok {
+		return c
+	} else {
+		contents, err := ioutil.ReadFile(filepath.Clean(filepath.Join(".", name)))
+		if err != nil {
+			panic(err)
+		}
+		assetFiles[name] = contents
+		return contents
+	}
 }
