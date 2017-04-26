@@ -5,14 +5,13 @@
     <a href="/signout">Sign out</a>
   </div>
 
-  <script type="text/javascript">
-    {{template "ramda.min.js"}}
-    {{template "mithril.min.js"}}
-    {{template "sjcl.js"}}
-    {{template "app.js"}}
-  </script>
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/default.min.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/highlight.min.js"></script>
+  <script type="text/javascript" src="/public/ramda.min.js"></script>
+  <script type="text/javascript" src="/public/mithril.min.js"></script>
+  <script type="text/javascript" src="/public/sjcl.js"></script>
+  <script type="text/javascript" src="/public/app.js"></script>
+
+  <link rel="stylesheet" href="/public/highlight.css">
+  <script type="text/javascript" src="/public/highlight.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 </body>
 </html>
