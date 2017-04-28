@@ -126,6 +126,7 @@ PV.Actions.editItem = function(e) {
 
   return PV.Actions.saveVault().then(function() {
     PV.state.editingItem = null;
+    PV.state.selectedItem = item.id;
   });
 };
 
@@ -181,11 +182,15 @@ PV.Views.Create = {
 };
 
 PV.Views.Unlock = {
+  oncreate: function() {
+    document.getElementById("unlockPassword").focus();
+  },
   view: function() {
     return m("form.pa3", {onsubmit: PV.Actions.unlock}, [
       m("h2.fw3.mt0", "Unlock vault"),
       PV.state.unlockError ? m("p.mt0.dark-red", "Wrong password.") : null,
       m("input", {
+        id: "unlockPassword",
         type: "password",
         placeholder: "Vault password",
         class: "db w5 pa2 mb2 br1 ba",
@@ -215,6 +220,17 @@ PV.Views.Main = {
 };
 
 PV.Views.ItemList = {
+  oncreate: function() {
+    document.getElementById("searchText").focus();
+  },
+  selectFirst: function(filteredItems) {
+    return function(e) {
+      e.preventDefault();
+      if (filteredItems.length > 0) {
+        PV.state.selectedItem = filteredItems[0].id;
+      }
+    };
+  },
   view: function() {
     var filteredItems = R.sortBy(R.prop("name"), R.filter(
       R.compose(R.contains(PV.state.search.toLowerCase()), R.compose(R.toLower, R.prop("name"))),
@@ -225,12 +241,15 @@ PV.Views.ItemList = {
         m("a", {onclick: PV.Actions.addItemStart}, "+ New item"),
       ]),
       m(".pa2.bg-near-white.bb.b--moon-gray", [
-        m("input.db.pa2.br1.ba.b--moon-gray.w-100", {
-          type: "text",
-          placeholder: "Search...",
-          oninput: m.withAttr("value", function(value) {PV.state.search = value;}),
-          value: PV.state.search,
-        }),
+        m("form", {onsubmit: PV.Views.ItemList.selectFirst(filteredItems)}, [
+          m("input.db.pa2.br1.ba.b--moon-gray.w-100", {
+            id: "searchText",
+            type: "text",
+            placeholder: "Search...",
+            oninput: m.withAttr("value", function(value) {PV.state.search = value;}),
+            value: PV.state.search,
+          }),
+        ]),
       ]),
       m("div.overflow-y-auto", filteredItems.map(function(item) {
         return m("div.pa2.bb.b--moon-gray", {
@@ -286,18 +305,32 @@ PV.Views.ItemEdit = {
 };
 
 PV.Views.ItemView = {
+  oninit: function() {
+    this.showPassword = false;
+    this.onShow = function() { this.showPassword = true; }.bind(this);
+    this.onHide = function() { this.showPassword = false; }.bind(this);
+  },
   view: function() {
     var selectedItem = R.find(
       R.propEq('id', PV.state.selectedItem),
       PV.state.contents.items
     );
+
+    var password = ["************ ", m("a", {onclick: this.onShow}, "Show")];
+    if (this.showPassword) {
+      password = [
+        selectedItem.password || m.trust("&nbsp;"),
+        " ",
+        m("a", {onclick: this.onHide}, "Hide")
+      ];
+    }
     return m("main.pa3", [
       m("strong.db.mb1", "Name"),
       m("div.code.pa2.mb3.br1.bg-near-white", selectedItem.name || m.trust("&nbsp;")),
       m("strong.db.mb1", "Username"),
       m("div.code.pa2.mb3.br1.bg-near-white", selectedItem.username || m.trust("&nbsp;")),
       m("strong.db.mb1", "Password"),
-      m("div.code.pa2.mb3.br1.bg-near-white", selectedItem.password || m.trust("&nbsp;")),
+      m("div.code.pa2.mb3.br1.bg-near-white", password),
       m("strong.db.mb1", "Notes"),
       m("pre.code.pa2.mb3.br1.bg-near-white", selectedItem.notes || m.trust("&nbsp;")),
       m(PV.Views.Button, {

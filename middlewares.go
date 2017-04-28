@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -20,15 +21,22 @@ func authEmailFromContext(ctx context.Context) string {
 
 func middlewareRequireAuth(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// On error validating token, go to sign in
 		sessionToken := GetCookie(r, authCookieName)
 		userEmail, err := validateSessionToken(sessionToken)
-
-		// On error validating token, go to sign in
 		if err != nil {
 			log.Printf("auth: got error validating token: %v\n", err)
 			http.Redirect(w, r, "/signin", 302)
 			return
 		}
+
+		// Refresh session token for 2 weeks
+		sessionToken, err = createSessionToken(userEmail)
+		if err != nil {
+			sendError(w, r, errors.New("Error creating a session token"))
+			return
+		}
+		SetCookie(w, r, authCookieName, sessionToken)
 
 		// Else save user's email in context and go on
 		ctx := context.WithValue(r.Context(), contextKey("email"), userEmail)
