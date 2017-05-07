@@ -213,8 +213,8 @@ PV.Views.Main = {
       itemView = m(PV.Views.ItemView);
     }
     return m("main.cf", [
-      m("aside.fl.w-30-ns.br.b--moon-gray", m(PV.Views.ItemList)),
-      m("article.fl.w-70-ns", itemView),
+      m("aside.fl-ns.w-30-ns.br-ns.b--moon-gray", m(PV.Views.ItemList)),
+      m("article.fl-ns.w-70-ns", itemView),
     ]);
   }
 };

@@ -35,7 +35,7 @@
         </td>
         <td class="pv2 pr2 bb b--moon-gray">
           {{if ne $file.Type "folder"}}
-            <a href="/f/{{$file.Path}}" alt="Download">&#8681;</a>
+            <a href="{{$file.SignedURL}}" alt="Download">&#8681;</a>
           {{else}}
             &nbsp;
           {{end}}

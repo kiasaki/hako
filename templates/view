@@ -21,7 +21,7 @@
   </div>
 {{else if eq $typ "image"}}
   <div class="pa3">
-    <img class="mw-100" src="/f/{{.file.Path}}" />
+    <img class="mw-100" src="{{.file.SignedURL}}" />
   </div>
 {{else if eq $typ "audio"}}
   <div class="pa3">
@@ -46,7 +46,7 @@
   <div class="pa3">
     <div class="pb4 pt1 br2 bg-near-white tc">
       <h2 class="fw3">Unknown file type.</h2>
-      <a href="/f/{{.file.Path}}">Download file</a>
+      <a href="{{.file.SignedURL}}">Download file</a>
     </div>
   </div>
 {{end}}
