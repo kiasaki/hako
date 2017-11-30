@@ -28,6 +28,12 @@ weight Dropbox with no syncing but a web UI that allows editing.
 - Fast (if compared to slower webservers from intepreted languages)
 - HTML only, no need for JavaScript to be enabled
 
+| **Directory listing** | **Editing plain text** |
+| --- | --- |
+| ![home](https://raw.githubusercontent.com/kiasaki/hako/master/images/home.png) | ![edit](https://raw.githubusercontent.com/kiasaki/hako/master/images/edit.png) |
+| **Viewing images** | **Password manager** |
+| ![image](https://raw.githubusercontent.com/kiasaki/hako/master/images/image.png) | ![vault](https://raw.githubusercontent.com/kiasaki/hako/master/images/vault.png) |
+
 ## getting started
 
 Before you can build and start hako's webserver you'll need to create an `.env` file
