@@ -305,10 +305,23 @@ PV.Views.ItemEdit = {
 };
 
 PV.Views.ItemView = {
-  oninit: function() {
+  oninit: function(vnode) {
     this.showPassword = false;
-    this.onShow = function() { this.showPassword = true; }.bind(this);
-    this.onHide = function() { this.showPassword = false; }.bind(this);
+    this.onShow = function() {
+      this.showPassword = true;
+      m.redraw();
+      vnode.dom.querySelector("#password").select();
+    }.bind(this);
+    this.onHide = function() {
+      this.showPassword = false;
+    }.bind(this);
+  },
+  onupdate: function() {
+    if (PV.state.selectedItem != this.lastSelectedItem) {
+      this.showPassword = false;
+      m.redraw();
+    }
+    this.lastSelectedItem = PV.state.selectedItem;
   },
   view: function() {
     var selectedItem = R.find(
@@ -319,7 +332,17 @@ PV.Views.ItemView = {
     var password = ["************ ", m("a", {onclick: this.onShow}, "Show")];
     if (this.showPassword) {
       password = [
-        selectedItem.password || m.trust("&nbsp;"),
+        m("input.bn.bg-near-white#password", {
+          type: "text",
+          readonly: true,
+          onfocus: function() { this.select(); },
+          onclick: function() { this.select(); },
+          style: {
+            width: (selectedItem.password.length * 7.5) + 'px',
+            maxWidth: '400px',
+          },
+          value: selectedItem.password,
+        }),
         " ",
         m("a", {onclick: this.onHide}, "Hide")
       ];
@@ -365,7 +388,7 @@ PV.Views.ItemForm = {
       }),
       m("label.pb1", "Password"),
       m("input", {
-        type: "password",
+        type: "text",
         placeholder: "e.g. ••••••••••••••••",
         class: "db w5 pa2 mb2 br1 ba",
         oninput: m.withAttr("value", vnode.attrs.onupdate.bind(null, "password")),
