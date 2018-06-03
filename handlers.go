@@ -299,6 +299,52 @@ func handleEditSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleRename(w http.ResponseWriter, r *http.Request) {
+	email := authEmailFromContext(r.Context())
+	file, folder, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/r/"):])
+	if err != nil {
+		sendError(w, r, err)
+		return
+	}
+
+	renderTemplate(w, r, "rename", H{
+		"file":        file,
+		"folder":      folder,
+		"folderFiles": folderFiles,
+	})
+}
+
+func handleRenameSubmit(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		sendError(w, r, errors.New("Error parsing form"))
+		return
+	}
+	newFileName := r.FormValue("name")
+	if newFileName == "" {
+		sendError(w, r, errors.New("Invalid file name"))
+		return
+	}
+
+	fromFileName := filepath.Clean(r.URL.Path[len("/r/"):])
+	fromFile := &HakoFile{
+		Owner:    authEmailFromContext(r.Context()),
+		Path:     fromFileName,
+		Contents: []byte{},
+	}
+	toFile := &HakoFile{
+		Owner:    authEmailFromContext(r.Context()),
+		Path:     filepath.Clean(filepath.Join(filepath.Dir(fromFileName), newFileName)),
+		Contents: []byte{},
+	}
+	err := storageRename(fromFile, toFile)
+	if err != nil {
+		sendError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, "/v/"+toFile.Path, 302)
+}
+
 func handleDelete(w http.ResponseWriter, r *http.Request) {
 	email := authEmailFromContext(r.Context())
 	file, _, folderFiles, err := loadCurrentFileAndFolder(email, r.URL.Path[len("/d/"):])

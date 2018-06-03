@@ -11,6 +11,7 @@
     {{if ne $typ "folder"}}
       <a class="ml2" href="/f/{{.file.Path}}">Download</a>
     {{end}}
+    <a class="ml2" href="/r/{{.file.Path}}">Rename</a>
     <a class="ml2" onclick="javascript:return confirm('Are you sure?');" href="/d/{{.file.Path}}">Delete</a>
   </div>
 </div>

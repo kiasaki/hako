@@ -72,6 +72,8 @@ func main() {
 		match("GET", "/v/", handleView),
 		match("GET", "/e/", handleEdit),
 		match("POST", "/e/", handleEditSubmit),
+		match("GET", "/r/", handleRename),
+		match("POST", "/r/", handleRenameSubmit),
 		match("GET", "/d/", handleDelete),
 	).Then(http.HandlerFunc(handleNotFound))
 

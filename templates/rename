@@ -1,0 +1,18 @@
+{{template "header" .}}
+{{if eq .file.Type "folder"}}
+  <p class="dark-red">You can only rename files (not folders).</p>
+{{else}}
+
+<div class="ph3 cf bb b--near-white" style="line-height: 43px">
+  <div class="fl fw6">{{.file.Name}}</div>
+</div>
+
+<div class="pa3">
+  <form method="post" action="/r/{{.file.Path}}">
+    <input type="text" name="name" class="db w5 pa2 mb2 br1 ba" placeholder="File name" value="{{.file.Name}}" autofocus />
+    <button type="submit" class="f6 link dim br1 ph3 pv2 mb2 dib white bg-black bw0">Rename</button>
+  </form>
+</div>
+
+{{end}}
+{{template "footer" .}}

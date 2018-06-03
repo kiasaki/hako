@@ -99,6 +99,16 @@ func storagePut(f *HakoFile) error {
 	return wc.Close()
 }
 
+func storageRename(from, to *HakoFile) error {
+	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(from.Owner))
+	fromPath := filepath.Join(userPrefix, filepath.Clean(from.Path))
+	toPath := filepath.Join(userPrefix, filepath.Clean(to.Path))
+	if _, err := bucket.Object(toPath).CopierFrom(bucket.Object(fromPath)).Run(ctx); err != nil {
+		return err
+	}
+	return bucket.Object(fromPath).Delete(ctx)
+}
+
 func storageDel(f *HakoFile) error {
 	userPrefix := base64.RawURLEncoding.EncodeToString([]byte(f.Owner))
 	filePath := filepath.Join(userPrefix, filepath.Clean(f.Path))
