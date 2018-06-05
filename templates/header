@@ -32,17 +32,17 @@
 <body class="bg-near-white">
   <div class="mw8 h-100-ns">
     <aside class="w5-ns fixed-ns top-0 bottom-0 left-0 bg-near-white">
-      <h1 class="mt3 ml3 dib f4 fw3 ma0 pv2 ph3 bg-light-purple white">
+      <h1 class="dib f4 w-100 fw3 ma0 ph3 bg-light-purple white" style="line-height:43px;">
         hako
+        <a href="/u/{{.folder.Path}}" class="white f6 ml2 fr">Upload file</a>
+        <a href="/n/{{.folder.Path}}" class="white f6 fr">New file</a>
       </h1>
 
       <header class="pa3">
-        <div class="f4 pb3 elips">{{.folder.Name}}</div>
-        <a href="/n/{{.folder.Path}}">New file</a>
-        <a href="/u/{{.folder.Path}}" class="ml2">Upload file</a>
+        <div class="f4 elips">{{.folder.Name}}</div>
       </header>
 
-      <div class="pa3 bg-light-gray bt bb b--moon-gray">
+      <div class="pl3">
         {{if and (ne .folder.Path ".") (ne .folder.Path "")}}
           <a class="sidebar-link" href="/v/{{.folder.ParentPath}}">../</a>
         {{end}}

@@ -2,7 +2,7 @@
 
 {{$typ := .file.Type}}
 
-<div class="ph3 cf bb b--moon-gray" style="line-height: 43px">
+<div class="ph3 cf bb b--near-white" style="line-height: 43px">
   <div class="fl fw6">{{.file.Name}}</div>
   <div class="fr">
     {{if or (eq $typ "text") (eq $typ "markdown")}}
@@ -10,8 +10,8 @@
     {{end}}
     {{if ne $typ "folder"}}
       <a class="ml2" href="/f/{{.file.Path}}">Download</a>
+      <a class="ml2" href="/r/{{.file.Path}}">Rename</a>
     {{end}}
-    <a class="ml2" href="/r/{{.file.Path}}">Rename</a>
     <a class="ml2" onclick="javascript:return confirm('Are you sure?');" href="/d/{{.file.Path}}">Delete</a>
   </div>
 </div>
